@@ -11,6 +11,7 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -33,6 +34,6 @@ app.get("/", (req, res) => {
   res.send("بوابة الخدمات الإلكترونية تعمل بنجاح");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, "127.0.0.1", () => {
+  console.log(`Server is running on http://127.0.0.1:${PORT}`);
 });

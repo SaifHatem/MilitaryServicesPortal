@@ -17,26 +17,31 @@ const applicationFileSchema = new mongoose.Schema(
     originalName: {
       type: String,
       required: true,
+      trim: true,
     },
 
     storedName: {
       type: String,
       required: true,
+      trim: true,
     },
 
     filePath: {
       type: String,
       required: true,
+      trim: true,
     },
 
     mimeType: {
       type: String,
       required: true,
+      trim: true,
     },
 
     size: {
       type: Number,
       required: true,
+      min: 1,
     },
   },
   {

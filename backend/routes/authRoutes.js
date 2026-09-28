@@ -9,6 +9,11 @@ const authenticate = require("../middleware/authMiddleware");
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is not defined in environment variables");
+}
+
 // ==========================================
 // Register
 // ==========================================
@@ -17,13 +22,26 @@ router.post("/register", async (req, res) => {
   try {
     const { name, nationalId, phoneNumber, email, password } = req.body;
 
-    if (!name || !nationalId || !phoneNumber || !password) {
+    const cleanName = name?.trim();
+    const cleanNationalId = nationalId?.trim();
+    const cleanPhoneNumber = phoneNumber?.trim();
+    const cleanEmail = email?.trim().toLowerCase();
+
+    if (!cleanName || !cleanNationalId || !cleanPhoneNumber || !password) {
       return res.status(400).json({
         message: "من فضلك أدخل جميع البيانات المطلوبة",
       });
     }
 
-    const existingUser = await User.findOne({ nationalId });
+    if (!/^\d{14}$/.test(cleanNationalId)) {
+      return res.status(400).json({
+        message: "الرقم القومي يجب أن يتكون من 14 رقمًا",
+      });
+    }
+
+    const existingUser = await User.findOne({
+      nationalId: cleanNationalId,
+    });
 
     if (existingUser) {
       return res.status(400).json({
@@ -34,10 +52,10 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await User.create({
-      name,
-      nationalId,
-      phoneNumber,
-      email,
+      name: cleanName,
+      nationalId: cleanNationalId,
+      phoneNumber: cleanPhoneNumber,
+      email: cleanEmail || undefined,
       password: hashedPassword,
     });
 
@@ -70,13 +88,17 @@ router.post("/login", async (req, res) => {
   try {
     const { nationalId, password } = req.body;
 
-    if (!nationalId || !password) {
+    const cleanNationalId = nationalId?.trim();
+
+    if (!cleanNationalId || !password) {
       return res.status(400).json({
         message: "من فضلك أدخل الرقم القومي وكلمة المرور",
       });
     }
 
-    const user = await User.findOne({ nationalId });
+    const user = await User.findOne({
+      nationalId: cleanNationalId,
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -106,6 +128,7 @@ router.post("/login", async (req, res) => {
     res.json({
       message: "تم تسجيل الدخول بنجاح",
       token,
+
       user: {
         id: user._id,
         name: user.name,
@@ -123,6 +146,10 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+
+// ==========================================
+// Current User
+// ==========================================
 
 router.get("/me", authenticate, async (req, res) => {
   try {

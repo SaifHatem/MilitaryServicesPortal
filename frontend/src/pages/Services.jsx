@@ -15,7 +15,7 @@ const Services = () => {
         const response = await api.get("/services");
 
         setServices(response.data);
-      } catch (error) {
+      } catch {
         setError("حدث خطأ أثناء جلب الخدمات");
       } finally {
         setLoading(false);

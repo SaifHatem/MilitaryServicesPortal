@@ -92,9 +92,6 @@ function Applications() {
   };
 
   const handleDelete = async (application) => {
-    console.log("Application to delete:", application);
-    console.log("Application ID:", application?._id);
-
     const confirmed = window.confirm(
       "هل أنت متأكد من حذف هذا الطلب؟\n\nسيتم حذف الطلب وجميع المستندات المرفقة به نهائيًا.",
     );

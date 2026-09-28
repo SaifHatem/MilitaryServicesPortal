@@ -17,6 +17,7 @@ const serviceRequirementSchema = new mongoose.Schema(
     description: {
       type: String,
       default: "",
+      trim: true,
     },
 
     type: {
@@ -33,11 +34,23 @@ const serviceRequirementSchema = new mongoose.Schema(
     minFiles: {
       type: Number,
       default: 1,
+      min: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: "minFiles يجب أن يكون رقمًا صحيحًا",
+      },
     },
 
     maxFiles: {
       type: Number,
       default: 1,
+      min: 0,
+      validate: {
+        validator: function (value) {
+          return Number.isInteger(value) && value >= this.minFiles;
+        },
+        message: "maxFiles يجب أن يكون رقمًا صحيحًا وأكبر من أو يساوي minFiles",
+      },
     },
 
     allowMultiple: {
@@ -63,6 +76,11 @@ const serviceRequirementSchema = new mongoose.Schema(
     order: {
       type: Number,
       default: 0,
+      min: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: "order يجب أن يكون رقمًا صحيحًا",
+      },
     },
   },
   {

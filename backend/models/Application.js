@@ -32,6 +32,22 @@ const applicationSchema = new mongoose.Schema(
       trim: true,
     },
 
+    textResponses: [
+      {
+        requirementId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ServiceRequirement",
+          required: true,
+        },
+
+        value: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
+    ],
+
     status: {
       type: String,
       enum: [

@@ -20,6 +20,10 @@ const Dashboard = () => {
         <div className="user-area">
           <span>مرحبًا، {user?.name}</span>
 
+          {user?.role === "admin" && (
+            <button onClick={() => navigate("/admin")}>لوحة الإدارة</button>
+          )}
+
           <button onClick={handleLogout}>تسجيل الخروج</button>
         </div>
       </header>

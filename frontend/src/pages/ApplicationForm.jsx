@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 const ApplicationForm = () => {
   const { serviceId } = useParams();
   const navigate = useNavigate();
@@ -9,14 +11,9 @@ const ApplicationForm = () => {
   const [service, setService] = useState(null);
   const [requirements, setRequirements] = useState([]);
 
-  const [formData, setFormData] = useState({
-    applicantName: "",
-    nationalId: "",
-    phoneNumber: "",
-  });
-
-  // Files for every requirement
   const [files, setFiles] = useState({});
+
+  const [textResponses, setTextResponses] = useState({});
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,23 +59,45 @@ const ApplicationForm = () => {
     loadData();
   }, [serviceId]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // =========================
+  // Text requirement change
+  // =========================
+
+  const handleTextChange = (requirementId, value) => {
+    setTextResponses((previousResponses) => ({
+      ...previousResponses,
+      [requirementId]: value,
+    }));
   };
 
-  // Add a new file to a requirement
-  const handleFileAdd = (requirementId, event) => {
+  // =========================
+  // Add file
+  // =========================
+
+  const handleFileAdd = (requirement, event) => {
     const selectedFile = event.target.files?.[0];
 
     if (!selectedFile) {
       return;
     }
 
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      alert("حجم الملف يجب ألا يتجاوز 10 ميجابايت");
+      event.target.value = "";
+      return;
+    }
+
+    const requirementId = requirement._id;
+
     setFiles((previousFiles) => {
       const currentFiles = previousFiles[requirementId] || [];
+
+      const maxFiles =
+        requirement.allowMultiple === true ? requirement.maxFiles || 1 : 1;
+
+      if (currentFiles.length >= maxFiles) {
+        return previousFiles;
+      }
 
       return {
         ...previousFiles,
@@ -90,7 +109,10 @@ const ApplicationForm = () => {
     event.target.value = "";
   };
 
-  // Delete a selected file
+  // =========================
+  // Delete selected file
+  // =========================
+
   const handleFileRemove = (requirementId, fileIndex) => {
     setFiles((previousFiles) => {
       const currentFiles = previousFiles[requirementId] || [];
@@ -102,45 +124,28 @@ const ApplicationForm = () => {
     });
   };
 
+  // =========================
   // Open selected file
+  // =========================
+
   const handleFileView = (file) => {
     const fileUrl = URL.createObjectURL(file);
 
-    window.open(fileUrl, "_blank");
+    window.open(fileUrl, "_blank", "noopener,noreferrer");
 
     setTimeout(() => {
       URL.revokeObjectURL(fileUrl);
     }, 1000);
   };
 
+  // =========================
+  // Submit
+  // =========================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setSubmitError("");
-
-    // =========================
-    // Validate basic information
-    // =========================
-
-    if (!formData.applicantName.trim()) {
-      setSubmitError("من فضلك أدخل الاسم بالكامل");
-      return;
-    }
-
-    if (!formData.nationalId.trim()) {
-      setSubmitError("من فضلك أدخل الرقم القومي");
-      return;
-    }
-
-    if (formData.nationalId.length !== 14) {
-      setSubmitError("الرقم القومي يجب أن يتكون من 14 رقمًا");
-      return;
-    }
-
-    if (!formData.phoneNumber.trim()) {
-      setSubmitError("من فضلك أدخل رقم الهاتف");
-      return;
-    }
 
     // =========================
     // Validate requirements
@@ -154,11 +159,18 @@ const ApplicationForm = () => {
         return;
       }
 
-      // Text requirements are handled separately
+      // Text requirements
       if (requirement.type === "text") {
+        const textValue = textResponses[requirement._id] || "";
+
+        if (requirement.required && !textValue.trim()) {
+          missingRequirements.push(requirement.name);
+        }
+
         return;
       }
 
+      // File requirements
       const requirementFiles = files[requirement._id] || [];
 
       if (
@@ -184,6 +196,41 @@ const ApplicationForm = () => {
     }
 
     // =========================
+    // Validate max files and size
+    // =========================
+
+    for (const requirement of requirements) {
+      if (
+        requirement.type === "info" ||
+        requirement.type === "text" ||
+        requirement.requiresUpload === false
+      ) {
+        continue;
+      }
+
+      const requirementFiles = files[requirement._id] || [];
+
+      const maxFiles =
+        requirement.allowMultiple === true ? requirement.maxFiles || 1 : 1;
+
+      if (requirementFiles.length > maxFiles) {
+        setSubmitError(
+          `لا يمكن رفع أكثر من ${maxFiles} ملف للمتطلب: ${requirement.name}`,
+        );
+
+        return;
+      }
+
+      for (const file of requirementFiles) {
+        if (file.size > MAX_FILE_SIZE) {
+          setSubmitError(`حجم الملف "${file.name}" يجب ألا يتجاوز 10 ميجابايت`);
+
+          return;
+        }
+      }
+    }
+
+    // =========================
     // Start submitting
     // =========================
 
@@ -191,17 +238,24 @@ const ApplicationForm = () => {
       setSubmitting(true);
 
       // =========================
+      // Prepare text responses
+      // =========================
+
+      const formattedTextResponses = Object.entries(textResponses)
+        .filter(([, value]) => value.trim())
+        .map(([requirementId, value]) => ({
+          requirementId,
+          value: value.trim(),
+        }));
+
+      // =========================
       // Create application
       // =========================
 
       const applicationResponse = await api.post("/applications", {
-        serviceId: serviceId,
-        applicantName: formData.applicantName,
-        nationalId: formData.nationalId,
-        phoneNumber: formData.phoneNumber,
+        serviceId,
+        textResponses: formattedTextResponses,
       });
-
-      console.log("Application response:", applicationResponse.data);
 
       const applicationId =
         applicationResponse.data.application?._id ||
@@ -210,8 +264,6 @@ const ApplicationForm = () => {
       if (!applicationId) {
         throw new Error("لم يتم الحصول على رقم الطلب من الخادم");
       }
-
-      console.log("Application ID:", applicationId);
 
       // =========================
       // Upload files
@@ -263,9 +315,17 @@ const ApplicationForm = () => {
     }
   };
 
+  // =========================
+  // Loading
+  // =========================
+
   if (loading) {
     return <div className="loading">جاري تحميل نموذج تقديم الطلب...</div>;
   }
+
+  // =========================
+  // Error
+  // =========================
 
   if (error) {
     return (
@@ -300,58 +360,6 @@ const ApplicationForm = () => {
 
       <div className="application-container">
         <form className="application-form" onSubmit={handleSubmit}>
-          {/* Applicant Information */}
-
-          <div className="form-section">
-            <div className="form-section-header">
-              <h2>بيانات مقدم الطلب</h2>
-
-              <p>يرجى إدخال البيانات الأساسية الخاصة بمقدم الطلب</p>
-            </div>
-
-            <div className="form-grid">
-              <div className="form-group">
-                <label>الاسم بالكامل</label>
-
-                <input
-                  type="text"
-                  name="applicantName"
-                  value={formData.applicantName}
-                  onChange={handleChange}
-                  placeholder="أدخل الاسم بالكامل"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>الرقم القومي</label>
-
-                <input
-                  type="text"
-                  name="nationalId"
-                  value={formData.nationalId}
-                  onChange={handleChange}
-                  placeholder="أدخل الرقم القومي"
-                  maxLength="14"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>رقم الهاتف</label>
-
-                <input
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber}
-                  onChange={handleChange}
-                  placeholder="أدخل رقم الهاتف"
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Requirements */}
 
           <div className="form-section">
@@ -364,6 +372,13 @@ const ApplicationForm = () => {
             <div className="upload-list">
               {requirements.map((requirement, index) => {
                 const requirementFiles = files[requirement._id] || [];
+
+                const maxFiles =
+                  requirement.allowMultiple === true
+                    ? requirement.maxFiles || 1
+                    : 1;
+
+                const canAddMoreFiles = requirementFiles.length < maxFiles;
 
                 return (
                   <div className="upload-item" key={requirement._id}>
@@ -388,6 +403,13 @@ const ApplicationForm = () => {
                         <div className="form-group requirement-text-input">
                           <input
                             type="text"
+                            value={textResponses[requirement._id] || ""}
+                            onChange={(event) =>
+                              handleTextChange(
+                                requirement._id,
+                                event.target.value,
+                              )
+                            }
                             placeholder={`أدخل ${requirement.name}`}
                           />
                         </div>
@@ -452,8 +474,7 @@ const ApplicationForm = () => {
 
                             {/* Add file */}
 
-                            {(requirement.allowMultiple ||
-                              requirementFiles.length === 0) && (
+                            {canAddMoreFiles && (
                               <label className="add-attachment-button">
                                 <span className="add-attachment-icon">+</span>
 
@@ -462,8 +483,9 @@ const ApplicationForm = () => {
                                 <input
                                   type="file"
                                   hidden
+                                  accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
                                   onChange={(event) =>
-                                    handleFileAdd(requirement._id, event)
+                                    handleFileAdd(requirement, event)
                                   }
                                 />
                               </label>
