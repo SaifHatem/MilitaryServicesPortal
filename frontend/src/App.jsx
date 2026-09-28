@@ -6,6 +6,7 @@ import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
 import ApplicationForm from "./pages/ApplicationForm";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Applications from "./pages/Applications";
 
 const App = () => (
   <BrowserRouter>
@@ -48,6 +49,14 @@ const App = () => (
         element={
           <ProtectedRoute>
             <ApplicationForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/applications"
+        element={
+          <ProtectedRoute>
+            <Applications />
           </ProtectedRoute>
         }
       />
