@@ -149,12 +149,12 @@ const ApplicationForm = () => {
     const missingRequirements = [];
 
     requirements.forEach((requirement) => {
-      // info requirements do not need upload
+      // Info requirements do not need upload
       if (requirement.type === "info" || requirement.requiresUpload === false) {
         return;
       }
 
-      // text requirements are handled separately
+      // Text requirements are handled separately
       if (requirement.type === "text") {
         return;
       }
@@ -211,6 +211,8 @@ const ApplicationForm = () => {
         throw new Error("لم يتم الحصول على رقم الطلب من الخادم");
       }
 
+      console.log("Application ID:", applicationId);
+
       // =========================
       // Upload files
       // =========================
@@ -229,7 +231,7 @@ const ApplicationForm = () => {
         });
 
         await api.post(
-          `/uploads/${application._id}/${requirement._id}`,
+          `/uploads/${applicationId}/${requirement._id}`,
           uploadData,
           {
             headers: {
@@ -243,16 +245,17 @@ const ApplicationForm = () => {
       // Submit application
       // =========================
 
-      await api.post(`/applications/${application._id}/submit`);
+      await api.post(`/applications/${applicationId}/submit`);
 
       alert("تم تقديم الطلب بنجاح");
 
       navigate("/dashboard");
     } catch (error) {
-      console.error(error);
+      console.error("Submit error:", error);
 
       setSubmitError(
         error.response?.data?.message ||
+          error.message ||
           "حدث خطأ أثناء تقديم الطلب، برجاء المحاولة مرة أخرى",
       );
     } finally {

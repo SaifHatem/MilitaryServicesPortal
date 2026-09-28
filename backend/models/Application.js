@@ -49,6 +49,38 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    corrections: [
+      {
+        requirementId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "ServiceRequirement",
+          required: true,
+        },
+
+        message: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+
+        status: {
+          type: String,
+          enum: ["pending", "resolved"],
+          default: "pending",
+        },
+
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+
+        resolvedAt: {
+          type: Date,
+          default: null,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

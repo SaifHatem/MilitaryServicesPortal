@@ -8,6 +8,7 @@ function Applications() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     loadApplications();
@@ -90,6 +91,34 @@ function Applications() {
     });
   };
 
+  const handleDelete = async (application) => {
+    console.log("Application to delete:", application);
+    console.log("Application ID:", application?._id);
+
+    const confirmed = window.confirm(
+      "هل أنت متأكد من حذف هذا الطلب؟\n\nسيتم حذف الطلب وجميع المستندات المرفقة به نهائيًا.",
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(application._id);
+      setError("");
+
+      await api.delete(`/applications/${application._id}`);
+
+      setApplications((previousApplications) =>
+        previousApplications.filter((item) => item._id !== application._id),
+      );
+    } catch (err) {
+      console.error("Delete application error:", err);
+
+      setError(err.response?.data?.message || "حدث خطأ أثناء حذف الطلب");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="applications-page">
@@ -106,6 +135,7 @@ function Applications() {
         <div className="applications-header">
           <div>
             <h1>طلباتي</h1>
+
             <p>يمكنك متابعة جميع الطلبات التي قمت بتقديمها</p>
           </div>
 
@@ -175,6 +205,18 @@ function Applications() {
                   >
                     عرض تفاصيل الطلب
                   </button>
+
+                  {application.status === "draft" && (
+                    <button
+                      className="delete-application-button"
+                      onClick={() => handleDelete(application)}
+                      disabled={deletingId === application._id}
+                    >
+                      {deletingId === application._id
+                        ? "جاري الحذف..."
+                        : "حذف الطلب"}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
