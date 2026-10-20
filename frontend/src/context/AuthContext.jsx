@@ -23,6 +23,17 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
+  const updateUser = async (userData) => {
+    const response = await api.patch("/auth/me", userData);
+
+    const updatedUser = response.data.user;
+
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+    return response.data;
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -42,7 +53,6 @@ export const AuthProvider = ({ children }) => {
       const response = await api.get("/auth/me");
 
       setUser(response.data);
-
       localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
       localStorage.removeItem("token");
@@ -65,6 +75,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        updateUser,
       }}
     >
       {children}

@@ -1916,3 +1916,640 @@ button {
   transform: translateY(-2px);
   opacity: 0.92;
 }
+
+/* ============================= */
+/* AUTHORITY BRANDING */
+/* ============================= */
+
+.authority-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  direction: rtl;
+}
+
+.authority-logo {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.authority-brand-text {
+  text-align: right;
+}
+
+.authority-brand-text h1 {
+  margin: 0 0 5px;
+  color: #1f2937;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.authority-brand-text p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Compact version for Navbar */
+
+.authority-brand-compact {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.authority-brand-compact .authority-logo {
+  width: 48px;
+  height: 48px;
+}
+
+.authority-brand-compact .authority-brand-text h1 {
+  font-size: 17px;
+  margin-bottom: 2px;
+}
+
+.authority-brand-compact .authority-brand-text p {
+  font-size: 12px;
+}
+
+/* Auth pages */
+
+.auth-card .authority-brand {
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.auth-card .authority-brand-text {
+  text-align: center;
+}
+
+.auth-card .authority-logo {
+  width: 95px;
+  height: 95px;
+}
+
+.auth-card .authority-brand-text h1 {
+  font-size: 23px;
+}
+
+.auth-card .authority-brand-text p {
+  font-size: 14px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .authority-brand {
+    gap: 10px;
+  }
+
+  .authority-logo {
+    width: 65px;
+    height: 65px;
+  }
+
+  .authority-brand-text h1 {
+    font-size: 19px;
+  }
+
+  .authority-brand-text p {
+    font-size: 12px;
+  }
+
+  .authority-brand-compact .authority-logo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .authority-brand-compact .authority-brand-text h1 {
+    font-size: 15px;
+  }
+
+  .authority-brand-compact .authority-brand-text p {
+    font-size: 10px;
+  }
+}
+
+/* ============================= */
+/* AUTHORITY BRANDING */
+/* ============================= */
+
+.authority-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  direction: rtl;
+}
+
+.authority-logo {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.authority-brand-text {
+  text-align: right;
+}
+
+.authority-brand-text h1 {
+  margin: 0 0 5px;
+  color: #1f2937;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.authority-brand-text p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.authority-brand-compact {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.authority-brand-compact .authority-logo {
+  width: 48px;
+  height: 48px;
+}
+
+.authority-brand-compact .authority-brand-text h1 {
+  font-size: 17px;
+  margin-bottom: 2px;
+}
+
+.authority-brand-compact .authority-brand-text p {
+  font-size: 12px;
+}
+
+/* Auth pages */
+
+.auth-card .authority-brand {
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.auth-card .authority-brand-text {
+  text-align: center;
+}
+
+.auth-card .authority-logo {
+  width: 95px;
+  height: 95px;
+}
+
+.auth-card .authority-brand-text h1 {
+  font-size: 23px;
+}
+
+.auth-card .authority-brand-text p {
+  font-size: 14px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .authority-brand {
+    gap: 10px;
+  }
+
+  .authority-logo {
+    width: 65px;
+    height: 65px;
+  }
+
+  .authority-brand-text h1 {
+    font-size: 19px;
+  }
+
+  .authority-brand-text p {
+    font-size: 12px;
+  }
+
+  .authority-brand-compact .authority-logo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .authority-brand-compact .authority-brand-text h1 {
+    font-size: 15px;
+  }
+
+  .authority-brand-compact .authority-brand-text p {
+    font-size: 10px;
+  }
+}
+/* Hide text cursor only on non-editable elements */
+
+body *:not(input):not(textarea):not([contenteditable="true"]) {
+  caret-color: transparent !important;
+}
+
+/* Restore text cursor inside editable fields */
+
+input:not([readonly]):not([disabled]),
+textarea:not([readonly]):not([disabled]),
+[contenteditable="true"] {
+  caret-color: auto !important;
+}
+
+/* =========================================
+   MILITARY SERVICES PORTAL - COLOR THEME
+   Primary: RGB(30, 41, 59) / #1E293B
+========================================= */
+
+:root {
+  --primary-color: #1e293b;
+  --primary-hover: #334155;
+  --primary-light: #e2e8f0;
+  --page-background: #f8fafc;
+  --surface-color: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+}
+
+/* General page colors */
+body {
+  background: var(--page-background);
+  color: var(--text-primary);
+}
+
+/* Main App Bar / Navbar */
+.navbar {
+  background: var(--primary-color);
+  color: #ffffff;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+}
+
+/* Authority branding inside Navbar */
+.navbar .authority-brand-text h1,
+.navbar .authority-brand-text p {
+  color: #ffffff;
+}
+
+/* Primary buttons */
+.dashboard-card button,
+.page-header button,
+.service-card button,
+.start-application-button,
+.submit-application-button,
+.admin-refresh-button,
+.admin-view-button,
+.admin-review-button-blue,
+.new-application-button,
+.empty-services-button,
+.view-application-button {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+/* Hover effects for primary buttons */
+.dashboard-card button:hover,
+.page-header button:hover,
+.service-card button:hover,
+.start-application-button:hover,
+.submit-application-button:hover,
+.admin-refresh-button:hover,
+.admin-view-button:hover,
+.admin-review-button-blue:hover:not(:disabled),
+.new-application-button:hover,
+.empty-services-button:hover,
+.view-application-button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Inputs focus */
+.auth-card input:focus,
+.form-group input:focus,
+.requirement-text-input input:focus,
+.file-input-wrapper input[type="file"]:focus,
+.admin-filter-bar select:focus {
+  border-color: var(--primary-hover);
+}
+
+/* Selected requirement number */
+.requirement-number {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+/* Upload requirement number */
+.upload-item-number {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+/* Upload buttons */
+.file-input-wrapper input[type="file"]::file-selector-button {
+  background: var(--primary-color);
+}
+
+.file-input-wrapper input[type="file"]::file-selector-button:hover {
+  background: var(--primary-hover);
+}
+
+.add-attachment-button {
+  border-color: #94a3b8;
+  color: var(--primary-color);
+}
+
+.add-attachment-button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-hover);
+}
+
+.add-attachment-icon {
+  background: var(--primary-color);
+}
+
+/* Application and admin icons */
+.application-card-icon,
+.admin-stat-icon,
+.admin-application-icon {
+  background: var(--primary-light);
+}
+
+/* Active admin filter card */
+.admin-stat-card-active {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.08);
+}
+
+/* Links and headings */
+.dashboard-content h1,
+.services-page h1,
+.applications-header h1,
+.admin-header h1 {
+  color: var(--primary-color);
+}
+.authority-logo {
+  animation: logo-spin 10s linear infinite;
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+}
+
+@keyframes logo-spin {
+  from {
+    transform: perspective(600px) rotateY(0deg);
+  }
+
+  to {
+    transform: perspective(600px) rotateY(360deg);
+  }
+}
+
+/* =========================================
+   ACCOUNT SETTINGS
+========================================= */
+
+.account-settings-form {
+  width: 100%;
+  max-width: 720px;
+  margin: 28px auto 0;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  background: var(--surface-color, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+.account-settings-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.account-settings-form .form-group label {
+  color: var(--text-primary, #1e293b);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.account-settings-form .form-group input {
+  width: 100%;
+  min-height: 49px;
+  padding: 12px 15px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--text-primary, #1e293b);
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.account-settings-form .form-group input:focus {
+  border-color: var(--primary-color, #1e293b);
+  box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+}
+
+.account-settings-form .form-group input[readonly] {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.account-settings-form .form-group small {
+  color: var(--text-secondary, #64748b);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* Buttons */
+
+.account-settings-form > button {
+  min-height: 48px;
+  padding: 12px 22px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.account-settings-form > button[type="submit"] {
+  margin-top: 4px;
+  background: var(--primary-color, #1e293b);
+  color: #ffffff;
+  box-shadow: 0 5px 12px rgba(30, 41, 59, 0.16);
+}
+
+.account-settings-form > button[type="submit"]:hover:not(:disabled) {
+  background: var(--primary-hover, #334155);
+  transform: translateY(-1px);
+  box-shadow: 0 7px 16px rgba(30, 41, 59, 0.2);
+}
+
+.account-settings-form > button[type="button"] {
+  background: #f1f5f9;
+  color: var(--text-primary, #1e293b);
+  border-color: var(--border-color, #e2e8f0);
+}
+
+.account-settings-form > button[type="button"]:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.account-settings-form > button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Save feedback */
+
+.account-settings-form p[role="status"],
+.account-settings-form p[role="alert"] {
+  margin: 0;
+  padding: 13px 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.account-settings-form p[role="status"] {
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  color: #166534 !important;
+}
+
+.account-settings-form p[role="alert"] {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c !important;
+}
+
+/* Account page heading */
+
+.dashboard-content > h1 {
+  color: var(--primary-color, #1e293b);
+}
+
+.dashboard-content > p {
+  color: var(--text-secondary, #64748b);
+  line-height: 1.8;
+}
+
+/* Account settings responsive layout */
+
+@media (max-width: 700px) {
+  .account-settings-form {
+    margin-top: 22px;
+    padding: 22px 18px;
+    gap: 19px;
+    border-radius: 14px;
+  }
+
+  .account-settings-form > button {
+    width: 100%;
+  }
+}
+
+/* Navbar buttons */
+
+.navbar .user-area button {
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 9px;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.navbar .user-area button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.navbar .user-area button:last-child {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.navbar .user-area button:last-child:hover {
+  background: #991b1b;
+  border-color: #991b1b;
+}
+
+@media (max-width: 700px) {
+  .navbar .user-area {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+}
+
+/* Password Settings */
+
+.password-settings-section {
+  width: 100%;
+  max-width: 720px;
+  margin: 40px auto 0;
+}
+
+.password-settings-section h2 {
+  color: var(--primary-color, #1e293b);
+  font-size: 23px;
+  margin-bottom: 10px;
+}
+
+.password-settings-section > p {
+  color: var(--text-secondary, #64748b);
+  line-height: 1.8;
+}
+
+.password-settings-section .account-settings-form {
+  margin-top: 20px;
+}
+
+/* Restore normal cursor in editable fields */
+
+input:not([readonly]):not([disabled]),
+textarea:not([readonly]):not([disabled]),
+select:not([disabled]),
+[contenteditable="true"] {
+  cursor: text !important;
+}
+
+button,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
+input[readonly],
+input[disabled],
+textarea[readonly],
+textarea[disabled] {
+  cursor: not-allowed;
+}

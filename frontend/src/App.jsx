@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+
 import Dashboard from "./pages/Dashboard";
 import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
@@ -9,6 +11,7 @@ import ApplicationForm from "./pages/ApplicationForm";
 import Applications from "./pages/Applications";
 import ApplicationDetails from "./pages/ApplicationDetails";
 import AdminDashboard from "./pages/AdminDashboard";
+import AccountSettings from "./pages/AccountSettings";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -17,17 +20,14 @@ const App = () => (
   <BrowserRouter>
     <Routes>
       {/* Default */}
-
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Authentication */}
-
       <Route path="/login" element={<Login />} />
-
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Dashboard */}
-
       <Route
         path="/dashboard"
         element={
@@ -37,8 +37,16 @@ const App = () => (
         }
       />
 
-      {/* Services */}
+      <Route
+        path="/account-settings"
+        element={
+          <ProtectedRoute>
+            <AccountSettings />
+          </ProtectedRoute>
+        }
+      />
 
+      {/* Services */}
       <Route
         path="/services"
         element={
@@ -58,7 +66,6 @@ const App = () => (
       />
 
       {/* Application Form */}
-
       <Route
         path="/services/:serviceId/apply"
         element={
@@ -69,7 +76,6 @@ const App = () => (
       />
 
       {/* My Applications */}
-
       <Route
         path="/applications"
         element={
@@ -78,8 +84,6 @@ const App = () => (
           </ProtectedRoute>
         }
       />
-
-      {/* Application Details */}
 
       <Route
         path="/applications/:id"
@@ -91,7 +95,6 @@ const App = () => (
       />
 
       {/* Admin Dashboard */}
-
       <Route
         path="/admin"
         element={

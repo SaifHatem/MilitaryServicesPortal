@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import AuthorityBrand from "../components/AuthorityBrand";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -8,22 +9,19 @@ const Login = () => {
 
   const [nationalId, setNationalId] = useState("");
   const [password, setPassword] = useState("");
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      await login(nationalId, password);
-
+      await login(nationalId.trim(), password);
       navigate("/dashboard");
-    } catch (error) {
-      setError(error.response?.data?.message || "حدث خطأ أثناء تسجيل الدخول");
+    } catch (err) {
+      setError(err.response?.data?.message || "حدث خطأ أثناء تسجيل الدخول.");
     } finally {
       setLoading(false);
     }
@@ -32,39 +30,58 @@ const Login = () => {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>بوابة الخدمات الإلكترونية</h1>
+        <AuthorityBrand />
 
         <h2>تسجيل الدخول</h2>
 
         <form onSubmit={handleSubmit}>
-          <label>الرقم القومي</label>
-
+          <label htmlFor="login-national-id">الرقم القومي</label>
           <input
+            id="login-national-id"
             type="text"
             value={nationalId}
-            onChange={(e) => setNationalId(e.target.value)}
+            onChange={(event) => setNationalId(event.target.value)}
             placeholder="أدخل الرقم القومي"
+            autoComplete="username"
+            required
           />
 
-          <label>كلمة المرور</label>
-
+          <label htmlFor="login-password">كلمة المرور</label>
           <input
+            id="login-password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
             placeholder="أدخل كلمة المرور"
+            autoComplete="current-password"
+            required
           />
 
-          {error && <div className="error">{error}</div>}
+          <div style={{ textAlign: "left", margin: "10px 0" }}>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => navigate("/forgot-password")}
+            >
+              نسيت كلمة المرور؟
+            </button>
+          </div>
+
+          {error && (
+            <div className="error" role="alert">
+              {error}
+            </div>
+          )}
 
           <button type="submit" disabled={loading}>
-            {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+            {loading ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
           </button>
         </form>
 
         <p>ليس لديك حساب؟</p>
 
         <button
+          type="button"
           className="secondary-button"
           onClick={() => navigate("/register")}
         >

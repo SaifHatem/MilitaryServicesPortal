@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import AuthorityBrand from "../components/AuthorityBrand";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,36 +12,70 @@ const Register = () => {
     phoneNumber: "",
     email: "",
     password: "",
+    recoveryPhrase: "",
+    confirmRecoveryPhrase: "",
   });
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (event) => {
+    setForm((previous) => ({
+      ...previous,
+      [event.target.name]: event.target.value,
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
     setSuccess("");
-    setLoading(true);
+
+    if (!/^\d{14}$/.test(form.nationalId.trim())) {
+      setError("الرقم القومي يجب أن يتكون من 14 رقمًا.");
+      return;
+    }
+
+    if (form.password.length < 8) {
+      setError("كلمة المرور يجب ألا تقل عن 8 أحرف.");
+      return;
+    }
+
+    if (form.recoveryPhrase.trim().length < 12) {
+      setError("العبارة السرية يجب ألا تقل عن 12 حرفًا.");
+      return;
+    }
+
+    if (
+      form.recoveryPhrase.trim().toLowerCase() !==
+      form.confirmRecoveryPhrase.trim().toLowerCase()
+    ) {
+      setError("تأكيد العبارة السرية غير مطابق.");
+      return;
+    }
 
     try {
-      await api.post("/auth/register", form);
+      setLoading(true);
 
-      setSuccess("تم إنشاء الحساب بنجاح، يمكنك الآن تسجيل الدخول");
+      await api.post("/auth/register", {
+        ...form,
+        name: form.name.trim(),
+        nationalId: form.nationalId.trim(),
+        phoneNumber: form.phoneNumber.trim(),
+        email: form.email.trim(),
+        recoveryPhrase: form.recoveryPhrase.trim(),
+        confirmRecoveryPhrase: form.confirmRecoveryPhrase.trim(),
+      });
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
-    } catch (error) {
-      setError(error.response?.data?.message || "حدث خطأ أثناء إنشاء الحساب");
+      setSuccess("تم إنشاء الحساب بنجاح. يمكنك تسجيل الدخول الآن.");
+
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى.",
+      );
     } finally {
       setLoading(false);
     }
@@ -49,68 +84,126 @@ const Register = () => {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>بوابة الخدمات الإلكترونية</h1>
+        <AuthorityBrand />
 
         <h2>إنشاء حساب</h2>
 
         <form onSubmit={handleSubmit}>
-          <label>الاسم</label>
-
+          <label htmlFor="register-name">الاسم بالكامل</label>
           <input
+            id="register-name"
             name="name"
             value={form.name}
             onChange={handleChange}
-            placeholder="أدخل الاسم"
+            placeholder="أدخل الاسم بالكامل"
+            autoComplete="name"
+            required
           />
 
-          <label>الرقم القومي</label>
-
+          <label htmlFor="register-national-id">الرقم القومي</label>
           <input
+            id="register-national-id"
             name="nationalId"
             value={form.nationalId}
             onChange={handleChange}
-            placeholder="أدخل الرقم القومي"
+            placeholder="14 رقمًا"
+            inputMode="numeric"
+            maxLength={14}
+            required
           />
 
-          <label>رقم الهاتف</label>
-
+          <label htmlFor="register-phone">رقم الهاتف</label>
           <input
+            id="register-phone"
             name="phoneNumber"
+            type="tel"
             value={form.phoneNumber}
             onChange={handleChange}
             placeholder="أدخل رقم الهاتف"
+            autoComplete="tel"
+            required
           />
 
-          <label>البريد الإلكتروني</label>
-
+          <label htmlFor="register-email">البريد الإلكتروني (اختياري)</label>
           <input
+            id="register-email"
             type="email"
             name="email"
             value={form.email}
             onChange={handleChange}
             placeholder="البريد الإلكتروني"
+            autoComplete="email"
           />
 
-          <label>كلمة المرور</label>
-
+          <label htmlFor="register-password">كلمة المرور</label>
           <input
+            id="register-password"
             type="password"
             name="password"
             value={form.password}
             onChange={handleChange}
-            placeholder="كلمة المرور"
+            placeholder="8 أحرف على الأقل"
+            autoComplete="new-password"
+            minLength={8}
+            required
           />
 
-          {error && <div className="error">{error}</div>}
+          <hr />
 
-          {success && <div className="success">{success}</div>}
+          <h3>عبارة استعادة الحساب</h3>
+          <p>
+            احفظ العبارة السرية في مكان آمن. ستحتاج إليها إذا نسيت كلمة المرور.
+          </p>
+
+          <label htmlFor="recovery-phrase">العبارة السرية</label>
+          <input
+            id="recovery-phrase"
+            type="text"
+            name="recoveryPhrase"
+            value={form.recoveryPhrase}
+            onChange={handleChange}
+            placeholder="12 حرفًا على الأقل"
+            autoComplete="off"
+            minLength={12}
+            maxLength={200}
+            required
+          />
+
+          <label htmlFor="confirm-recovery-phrase">تأكيد العبارة السرية</label>
+          <input
+            id="confirm-recovery-phrase"
+            type="text"
+            name="confirmRecoveryPhrase"
+            value={form.confirmRecoveryPhrase}
+            onChange={handleChange}
+            placeholder="أعد كتابة العبارة السرية"
+            autoComplete="off"
+            minLength={12}
+            maxLength={200}
+            required
+          />
+
+          {error && (
+            <div className="error" role="alert">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="success" role="status">
+              {success}
+            </div>
+          )}
 
           <button type="submit" disabled={loading}>
-            {loading ? "جاري إنشاء الحساب..." : "إنشاء الحساب"}
+            {loading ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب"}
           </button>
         </form>
 
-        <button className="secondary-button" onClick={() => navigate("/login")}>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => navigate("/login")}
+        >
           العودة لتسجيل الدخول
         </button>
       </div>

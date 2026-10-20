@@ -33,12 +33,36 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 8,
+      select: false,
+    },
+
+    // Hash العبارة السرية لاستعادة الحساب.
+    recoveryPhraseHash: {
+      type: String,
+      select: false,
+    },
+
+    // Hash رمز إعادة تعيين كلمة المرور.
+    passwordResetTokenHash: {
+      type: String,
+      select: false,
+    },
+
+    // موعد انتهاء صلاحية رمز الاستعادة.
+    passwordResetExpiresAt: {
+      type: Date,
+      select: false,
     },
 
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   {

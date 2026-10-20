@@ -540,6 +540,9 @@
 }
 
 .correction-document-name {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   font-weight: 800;
   font-size: 16px;
   color: #1f2937;

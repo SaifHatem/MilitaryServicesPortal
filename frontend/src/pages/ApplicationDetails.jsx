@@ -230,6 +230,98 @@ function ApplicationDetails() {
   };
 
   // =========================
+  // PRINT FILE (ADMIN ONLY BUTTON)
+  // =========================
+
+  const handlePrintFile = async (file) => {
+    // Open the tab immediately so the browser doesn't block the print window.
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      alert("من فضلك اسمح بفتح النوافذ المنبثقة لهذا الموقع ثم حاول مرة أخرى");
+      return;
+    }
+
+    let blobUrl;
+
+    try {
+      const response = await api.get(`/uploads/file/${file._id}`, {
+        responseType: "blob",
+      });
+
+      const mimeType = file.mimeType || response.data.type || "";
+      const isImage = mimeType.startsWith("image/");
+      const isPdf = mimeType === "application/pdf";
+
+      if (!isImage && !isPdf) {
+        printWindow.close();
+        alert(
+          "الطباعة المباشرة متاحة للصور وملفات PDF فقط. سيتم تحميل ملف Word لتتمكن من طباعته.",
+        );
+        await handleDownloadFile(file);
+        return;
+      }
+
+      blobUrl = window.URL.createObjectURL(response.data);
+
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!doctype html>
+        <html lang="ar">
+          <head>
+            <meta charset="utf-8" />
+            <title>طباعة المستند</title>
+            <style>
+              html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+              img { display: block; max-width: 100%; max-height: 100vh; margin: auto; object-fit: contain; }
+              iframe { border: 0; width: 100%; height: 100vh; }
+              @media print { img { max-width: 100%; max-height: 100vh; } iframe { height: 100vh; } }
+            </style>
+          </head>
+          <body>
+            ${
+              isImage
+                ? '<img id="print-image" alt="المستند" />'
+                : '<iframe id="print-pdf" title="المستند" ></iframe>'
+            }
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+      if (isImage) {
+        const imageElement = printWindow.document.getElementById("print-image");
+        imageElement.onload = () => {
+          printWindow.focus();
+          printWindow.print();
+        };
+        imageElement.onerror = () => {
+          printWindow.close();
+          alert("تعذر تجهيز الصورة للطباعة");
+        };
+        imageElement.src = blobUrl;
+      } else {
+        const pdfFrame = printWindow.document.getElementById("print-pdf");
+        pdfFrame.onload = () => {
+          setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+          }, 700);
+        };
+        pdfFrame.src = blobUrl;
+      }
+
+      // Keep the blob alive while the print dialog is being used.
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 5 * 60 * 1000);
+    } catch (err) {
+      console.error("Print file error:", err);
+      if (!printWindow.closed) printWindow.close();
+      if (blobUrl) window.URL.revokeObjectURL(blobUrl);
+      alert(err.response?.data?.message || "تعذر تجهيز المستند للطباعة");
+    }
+  };
+
+  // =========================
   // USER CORRECTIONS
   // =========================
 
@@ -576,6 +668,24 @@ function ApplicationDetails() {
                     <span>{file.originalName || file.filename || "مستند"}</span>
                   </div>
                 </div>
+
+                <div className="admin-file-actions">
+                  <button
+                    type="button"
+                    className="view-file-button"
+                    onClick={() => handleViewFile(file)}
+                  >
+                    👁 عرض
+                  </button>
+
+                  <button
+                    type="button"
+                    className="download-file-button"
+                    onClick={() => handleDownloadFile(file)}
+                  >
+                    ↓ تحميل
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -650,10 +760,19 @@ function ApplicationDetails() {
                   </button>
 
                   <button
+                    type="button"
                     className="download-file-button"
                     onClick={() => handleDownloadFile(file)}
                   >
                     ↓ تحميل
+                  </button>
+
+                  <button
+                    type="button"
+                    className="view-file-button"
+                    onClick={() => handlePrintFile(file)}
+                  >
+                    🖨 طباعة
                   </button>
                 </div>
               </div>
