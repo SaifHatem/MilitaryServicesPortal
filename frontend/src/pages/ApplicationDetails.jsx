@@ -42,8 +42,7 @@ function ApplicationDetails() {
   const [uploadingRequirement, setUploadingRequirement] = useState("");
   const [resubmitting, setResubmitting] = useState(false);
 
-  const isAdmin = user?.role === "admin";
-
+  const canReview = ["admin", "reviewer"].includes(user?.role);
   useEffect(() => {
     fetchApplication();
   }, [id]);
@@ -917,12 +916,14 @@ function ApplicationDetails() {
         <div className="application-header">
           <div>
             <div className="application-header-label">
-              {isAdmin ? "لوحة الإدارة" : "الخدمة الإلكترونية"}
+              {canReview ? "لوحة الإدارة" : "الخدمة الإلكترونية"}{" "}
             </div>
 
             <h1>{application.serviceId?.name || "تفاصيل الطلب"}</h1>
 
-            <p>{isAdmin ? "مراجعة ومتابعة طلب الخدمة" : "متابعة حالة طلبك"}</p>
+            <p>
+              {canReview ? "مراجعة ومتابعة طلب الخدمة" : "متابعة حالة طلبك"}
+            </p>
           </div>
 
           <button
@@ -932,7 +933,6 @@ function ApplicationDetails() {
             العودة
           </button>
         </div>
-
         {/* SUMMARY */}
         <div className="application-summary">
           <div className="summary-box">
@@ -961,9 +961,8 @@ function ApplicationDetails() {
             </strong>
           </div>
         </div>
-
         {/* DIFFERENT UI */}
-        {isAdmin ? AdminView() : UserView()}
+        {canReview ? AdminView() : UserView()}{" "}
       </div>
     </div>
   );

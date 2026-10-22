@@ -124,29 +124,41 @@ function AdminDashboard() {
             <p>يمكنك متابعة ومراجعة جميع الطلبات المقدمة</p>
           </div>
 
-          <button className="admin-refresh-button" onClick={loadApplications}>
-            تحديث الطلبات
-          </button>
+          <div className="admin-header-actions">
+            <button
+              type="button"
+              className="admin-refresh-button"
+              onClick={loadApplications}
+            >
+              تحديث الطلبات
+            </button>
+          </div>
         </div>
-        {error && <div className="admin-error"> {error} </div>} {/* Filter */}{" "}
+
+        {error && (
+          <div className="admin-error" role="alert">
+            {error}
+          </div>
+        )}
+
+        {/* Filter */}
         <div className="admin-filter-bar">
-          {" "}
-          <label htmlFor="status-filter"> فلترة الطلبات </label>{" "}
+          <label htmlFor="status-filter">فلترة الطلبات</label>
+
           <select
             id="status-filter"
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
+            onChange={(event) => setFilter(event.target.value)}
           >
-            {" "}
-            <option value="all">كل الطلبات</option>{" "}
-            <option value="submitted">تم التقديم</option>{" "}
-            <option value="under_review">قيد المراجعة</option>{" "}
-            <option value="approved">تم قبول الطلب</option>{" "}
-            <option value="rejected">تم رفض الطلب</option>{" "}
-            <option value="needs_correction"> يحتاج إلى تصحيح </option>{" "}
-          </select>{" "}
-        </div>{" "}
-        {/* Statistics */}
+            <option value="all">كل الطلبات</option>
+            <option value="submitted">تم التقديم</option>
+            <option value="under_review">قيد المراجعة</option>
+            <option value="approved">تم قبول الطلب</option>
+            <option value="rejected">تم رفض الطلب</option>
+            <option value="needs_correction">يحتاج إلى تصحيح</option>
+          </select>
+        </div>
+
         {/* Statistics */}
         <div className="admin-stats-grid">
           <div
@@ -233,6 +245,7 @@ function AdminDashboard() {
             </div>
           </div>
         </div>
+
         {/* Applications */}
         <div className="admin-applications-section">
           <div className="admin-section-header">
@@ -250,6 +263,7 @@ function AdminDashboard() {
 
             {filter !== "all" && (
               <button
+                type="button"
                 className="admin-clear-filter"
                 onClick={() => setFilter("all")}
               >
@@ -278,22 +292,21 @@ function AdminDashboard() {
 
                       <div className="admin-application-meta">
                         <span>
-                          رقم الطلب:
-                          <strong>{application._id}</strong>
+                          رقم الطلب: <strong>{application._id}</strong>
                         </span>
 
                         <span>
-                          مقدم الطلب:
+                          مقدم الطلب:{" "}
                           <strong>{application.applicantName || "-"}</strong>
                         </span>
 
                         <span>
-                          الرقم القومي:
+                          الرقم القومي:{" "}
                           <strong>{application.nationalId || "-"}</strong>
                         </span>
 
                         <span>
-                          تاريخ الطلب:
+                          تاريخ الطلب:{" "}
                           <strong>{formatDate(application.createdAt)}</strong>
                         </span>
                       </div>
@@ -310,6 +323,7 @@ function AdminDashboard() {
 
                   <div className="admin-application-footer">
                     <button
+                      type="button"
                       className="admin-view-button"
                       onClick={() =>
                         navigate(`/applications/${application._id}`)

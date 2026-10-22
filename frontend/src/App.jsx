@@ -12,6 +12,7 @@ import Applications from "./pages/Applications";
 import ApplicationDetails from "./pages/ApplicationDetails";
 import AdminDashboard from "./pages/AdminDashboard";
 import AccountSettings from "./pages/AccountSettings";
+import UsersManagement from "./pages/UsersManagement";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -37,6 +38,7 @@ const App = () => (
         }
       />
 
+      {/* Account Settings */}
       <Route
         path="/account-settings"
         element={
@@ -94,12 +96,22 @@ const App = () => (
         }
       />
 
-      {/* Admin Dashboard */}
+      {/* Admin and Reviewer: Application Review */}
       <Route
         path="/admin"
         element={
-          <AdminRoute>
+          <AdminRoute allowedRoles={["admin", "reviewer"]}>
             <AdminDashboard />
+          </AdminRoute>
+        }
+      />
+
+      {/* Admin Only: Account Management */}
+      <Route
+        path="/admin/users"
+        element={
+          <AdminRoute>
+            <UsersManagement />
           </AdminRoute>
         }
       />

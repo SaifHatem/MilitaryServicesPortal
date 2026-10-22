@@ -9,7 +9,7 @@ const ApplicationFile = require("../models/ApplicationFile");
 const User = require("../models/User");
 
 const authenticate = require("../middleware/authMiddleware");
-const adminOnly = require("../middleware/adminMiddleware");
+const reviewerOnly = require("../middleware/reviewerMiddleware");
 
 const router = express.Router();
 
@@ -147,10 +147,10 @@ router.get("/my", authenticate, async (req, res) => {
 });
 
 // ============================================================
-// All applications - admin only, no drafts
+// All applications - reviewer and admin, no drafts
 // ============================================================
 
-router.get("/all", authenticate, adminOnly, async (req, res) => {
+router.get("/all", authenticate, reviewerOnly, async (req, res) => {
   try {
     const applications = await Application.find({
       status: { $ne: "draft" },
@@ -170,96 +170,101 @@ router.get("/all", authenticate, adminOnly, async (req, res) => {
 });
 
 // ============================================================
-// Add correction - admin only
+// Add correction - reviewer and admin
 // ============================================================
 
-router.post("/:id/corrections", authenticate, adminOnly, async (req, res) => {
-  try {
-    const { requirementId, message } = req.body;
+router.post(
+  "/:id/corrections",
+  authenticate,
+  reviewerOnly,
+  async (req, res) => {
+    try {
+      const { requirementId, message } = req.body;
 
-    if (!requirementId || !message?.trim()) {
-      return res.status(400).json({
-        message: "من فضلك اختر المستند واكتب سبب التصحيح",
+      if (!requirementId || !message?.trim()) {
+        return res.status(400).json({
+          message: "من فضلك اختر المستند واكتب سبب التصحيح",
+        });
+      }
+
+      const application = await Application.findById(req.params.id);
+
+      if (!application) {
+        return res.status(404).json({
+          message: "الطلب غير موجود",
+        });
+      }
+
+      if (application.status !== "under_review") {
+        return res.status(400).json({
+          message: "لا يمكن طلب تصحيح إلا للطلب قيد المراجعة",
+        });
+      }
+
+      const requirement = await ServiceRequirement.findOne({
+        _id: requirementId,
+        serviceId: application.serviceId,
+      });
+
+      if (!requirement) {
+        return res.status(404).json({
+          message: "المستند المحدد غير موجود ضمن متطلبات الخدمة",
+        });
+      }
+
+      if (
+        requirement.type === "info" ||
+        requirement.type === "text" ||
+        requirement.requiresUpload === false
+      ) {
+        return res.status(400).json({
+          message: "لا يمكن طلب تصحيح لهذا المتطلب",
+        });
+      }
+
+      const existingCorrection = application.corrections.find(
+        (correction) =>
+          correction.requirementId.toString() === requirementId.toString() &&
+          correction.status === "pending",
+      );
+
+      if (existingCorrection) {
+        existingCorrection.message = message.trim();
+        existingCorrection.createdAt = new Date();
+      } else {
+        application.corrections.push({
+          requirementId,
+          message: message.trim(),
+          status: "pending",
+          createdAt: new Date(),
+          resolvedAt: null,
+        });
+      }
+
+      application.status = "needs_correction";
+
+      await application.save();
+
+      const updatedApplication = await Application.findById(application._id)
+        .populate("serviceId")
+        .populate("corrections.requirementId");
+
+      res.json({
+        message: "تم إضافة ملاحظة التصحيح بنجاح",
+        application: updatedApplication,
+      });
+    } catch (error) {
+      console.error("Add correction error:", error);
+
+      res.status(500).json({
+        message: "حدث خطأ أثناء إضافة ملاحظة التصحيح",
       });
     }
-
-    const application = await Application.findById(req.params.id);
-
-    if (!application) {
-      return res.status(404).json({
-        message: "الطلب غير موجود",
-      });
-    }
-
-    if (application.status !== "under_review") {
-      return res.status(400).json({
-        message: "لا يمكن طلب تصحيح إلا للطلب قيد المراجعة",
-      });
-    }
-
-    const requirement = await ServiceRequirement.findOne({
-      _id: requirementId,
-      serviceId: application.serviceId,
-    });
-
-    if (!requirement) {
-      return res.status(404).json({
-        message: "المستند المحدد غير موجود ضمن متطلبات الخدمة",
-      });
-    }
-
-    if (
-      requirement.type === "info" ||
-      requirement.type === "text" ||
-      requirement.requiresUpload === false
-    ) {
-      return res.status(400).json({
-        message: "لا يمكن طلب تصحيح لهذا المتطلب",
-      });
-    }
-
-    const existingCorrection = application.corrections.find(
-      (correction) =>
-        correction.requirementId.toString() === requirementId.toString() &&
-        correction.status === "pending",
-    );
-
-    if (existingCorrection) {
-      existingCorrection.message = message.trim();
-      existingCorrection.createdAt = new Date();
-    } else {
-      application.corrections.push({
-        requirementId,
-        message: message.trim(),
-        status: "pending",
-        createdAt: new Date(),
-        resolvedAt: null,
-      });
-    }
-
-    application.status = "needs_correction";
-
-    await application.save();
-
-    const updatedApplication = await Application.findById(application._id)
-      .populate("serviceId")
-      .populate("corrections.requirementId");
-
-    res.json({
-      message: "تم إضافة ملاحظة التصحيح بنجاح",
-      application: updatedApplication,
-    });
-  } catch (error) {
-    console.error("Add correction error:", error);
-
-    res.status(500).json({
-      message: "حدث خطأ أثناء إضافة ملاحظة التصحيح",
-    });
-  }
-});
+  },
+);
 
 // ============================================================
-// Delete application
+// Delete application - owner only
 // ============================================================
 
 router.delete("/:id", authenticate, async (req, res) => {
@@ -327,6 +332,7 @@ router.delete("/:id", authenticate, async (req, res) => {
 
 // ============================================================
 // Get single application
+// Owner OR Reviewer OR Admin
 // ============================================================
 
 router.get("/:id", authenticate, async (req, res) => {
@@ -342,8 +348,10 @@ router.get("/:id", authenticate, async (req, res) => {
       });
     }
 
+    const canReview = ["admin", "reviewer"].includes(req.user.role);
+
     if (
-      req.user.role !== "admin" &&
+      !canReview &&
       application.userId.toString() !== req.user.userId.toString()
     ) {
       return res.status(403).json({
@@ -362,10 +370,10 @@ router.get("/:id", authenticate, async (req, res) => {
 });
 
 // ============================================================
-// Change status - admin only
+// Change status - reviewer and admin
 // ============================================================
 
-router.patch("/:id/status", authenticate, adminOnly, async (req, res) => {
+router.patch("/:id/status", authenticate, reviewerOnly, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -392,20 +400,14 @@ router.patch("/:id/status", authenticate, adminOnly, async (req, res) => {
 
     const currentStatus = application.status;
 
-    // ========================================================
     // Final statuses cannot be changed
-    // ========================================================
-
     if (currentStatus === "approved" || currentStatus === "rejected") {
       return res.status(400).json({
         message: "لا يمكن تغيير حالة طلب نهائي",
       });
     }
 
-    // ========================================================
     // submitted -> under_review only
-    // ========================================================
-
     if (currentStatus === "submitted") {
       if (status !== "under_review") {
         return res.status(400).json({
@@ -414,10 +416,7 @@ router.patch("/:id/status", authenticate, adminOnly, async (req, res) => {
       }
     }
 
-    // ========================================================
     // under_review -> approved / rejected
-    // ========================================================
-
     if (currentStatus === "under_review") {
       if (status !== "approved" && status !== "rejected") {
         return res.status(400).json({
@@ -426,23 +425,12 @@ router.patch("/:id/status", authenticate, adminOnly, async (req, res) => {
       }
     }
 
-    // ========================================================
-    // needs_correction -> under_review
-    //
-    // Normally the user should resubmit first, which changes
-    // the application back to submitted.
-    // This block allows admin to review it again only if needed.
-    // ========================================================
-
+    // needs_correction -> resubmit by user first
     if (currentStatus === "needs_correction") {
       return res.status(400).json({
         message: "يجب إعادة تقديم الطلب من المستخدم أولًا",
       });
     }
-
-    // ========================================================
-    // Update status
-    // ========================================================
 
     application.status = status;
 
@@ -493,10 +481,7 @@ router.post("/:id/submit", authenticate, async (req, res) => {
     // Remember whether this is a resubmission
     const isResubmission = application.status === "needs_correction";
 
-    // ========================================================
     // Check pending corrections
-    // ========================================================
-
     const pendingCorrections = application.corrections.filter(
       (correction) => correction.status === "pending",
     );
@@ -508,10 +493,7 @@ router.post("/:id/submit", authenticate, async (req, res) => {
       });
     }
 
-    // ========================================================
     // Check file requirements
-    // ========================================================
-
     const requirements = await ServiceRequirement.find({
       serviceId: application.serviceId,
       required: true,
@@ -550,10 +532,7 @@ router.post("/:id/submit", authenticate, async (req, res) => {
       }
     }
 
-    // ========================================================
     // Check text requirements
-    // ========================================================
-
     const textRequirements = await ServiceRequirement.find({
       serviceId: application.serviceId,
       required: true,
@@ -574,10 +553,7 @@ router.post("/:id/submit", authenticate, async (req, res) => {
       }
     }
 
-    // ========================================================
     // Missing requirements
-    // ========================================================
-
     if (missingRequirements.length > 0) {
       return res.status(400).json({
         message: "لا يمكن إرسال الطلب، توجد مستندات أو بيانات ناقصة",
@@ -585,10 +561,7 @@ router.post("/:id/submit", authenticate, async (req, res) => {
       });
     }
 
-    // ========================================================
     // Submit
-    // ========================================================
-
     application.status = "submitted";
 
     await application.save();

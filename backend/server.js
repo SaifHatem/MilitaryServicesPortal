@@ -9,6 +9,7 @@ const requirementRoutes = require("./routes/requirementRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use("/api/requirements", requirementRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("بوابة الخدمات الإلكترونية تعمل بنجاح");
